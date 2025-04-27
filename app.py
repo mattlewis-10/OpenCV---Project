@@ -2,10 +2,9 @@ import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import cv2
-import os
 
-# Optional: Import your logic modules here
-# from embedder.embed import embed_watermark
+#Functions from other classes
+from embed import embed_watermark
 # from verifier.verify import verify_watermark
 # from detector.tamper_check import detect_tampering
 
@@ -50,9 +49,16 @@ class StegoApp:
         if self.cover_img is None or self.watermark_img is None:
             messagebox.showerror("Error", "Load both cover and watermark images first.")
             return
-        # embedded = embed_watermark(self.cover_img, self.watermark_img)
-        # self.display_image(embedded)
-        messagebox.showinfo("Embed", "Watermark embedding not yet implemented.")
+        try:
+            embedded = embed_watermark(self.cover_img, self.watermark_img)
+            
+            self.cover_img = embedded
+            self.display_image(embedded)
+            
+            messagebox.showinfo("Success", "Watermark embedding successful!")
+        
+        except Exception as e:
+            messagebox.showerror("Error", f"Embedding failed: {str(e)}")
 
     def verify_watermark(self):
         if self.cover_img is None:
