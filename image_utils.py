@@ -47,7 +47,6 @@ def convert_to_binary(image):
     return binary
 
 def resize_watermark(watermark, size):
-    
     resized = cv2.resize(watermark, size, interpolation=cv2.INTER_NEAREST)
     return resized
 

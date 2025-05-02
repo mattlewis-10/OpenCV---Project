@@ -49,6 +49,7 @@ class StegoApp:
         if self.cover_img is None or self.watermark_img is None:
             messagebox.showerror("Error", "Load both cover and watermark images first.")
             return
+        
         try:
             embedded = embed_watermark(self.cover_img, self.watermark_img)
             
