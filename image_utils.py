@@ -6,6 +6,7 @@ Created on Thu Apr 24 16:52:47 2025
 """
 
 import cv2
+import numpy as np
 
 # -----------------------------
 # IMAGE I/O
@@ -49,6 +50,21 @@ def convert_to_binary(image):
 def resize_watermark(watermark, size):
     resized = cv2.resize(watermark, size, interpolation=cv2.INTER_NEAREST)
     return resized
+
+def select_watermark_pattern(x, y, width, height):
+    #Return a binary 3x3 pattern based on keypoint location
+    if x < width and y < height / 2:
+        #Top-Left: X pattern
+        return np.array([1, 0, 1], [0, 1, 0], [1, 0, 1])
+    elif x >= width and y < height / 2:
+        #Top-Right: + pattern
+        return np.array([0, 1, 0], [1, 1, 1], [0, 1, 0])
+    elif x < width / 2 and y >= height / 2:
+        #Bottom-Left: block pattern
+        return np.array([1, 1, 1], [1, 0, 1], [1, 1, 1])
+    else:
+        #Bottom-Right: \ pattern
+        return np.array([1, 0, 0], [0, 1, 0], [0, 0, 1])
 
 # -----------------------------
 # LSB STEGANOGRAPHY
