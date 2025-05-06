@@ -7,6 +7,7 @@ Created on Thu Apr 24 16:52:47 2025
 
 import cv2
 import numpy as np
+from scipy.ndimage import rotate
 
 # -----------------------------
 # IMAGE I/O
@@ -51,20 +52,43 @@ def resize_watermark(watermark, size):
     resized = cv2.resize(watermark, size, interpolation=cv2.INTER_NEAREST)
     return resized
 
-def select_watermark_pattern(x, y, width, height):
-    #Return a binary 3x3 pattern based on keypoint location
-    if x < width and y < height / 2:
-        #Top-Left: X pattern
-        return np.array([1, 0, 1], [0, 1, 0], [1, 0, 1])
-    elif x >= width and y < height / 2:
-        #Top-Right: + pattern
-        return np.array([0, 1, 0], [1, 1, 1], [0, 1, 0])
-    elif x < width / 2 and y >= height / 2:
-        #Bottom-Left: block pattern
-        return np.array([1, 1, 1], [1, 0, 1], [1, 1, 1])
+
+def rotate_watermark_pattern(pattern, angle):
+    rotated = rotate(pattern, angle, reshape=False, order=0, mode='nearest')
+    return (rotated > 0.5).astype(np.uint8)
+
+def scale_watermark_pattern(pattern, target_size):
+    return cv2.resize(pattern, (target_size, target_size), interpolation=cv2.INTER_NEAREST)
+
+
+def select_watermark_pattern(x, y, w, h, binary_watermark, angle):
+    """
+    Return an adapted watermark pattern based on keypoint position and angle.
+    
+    Args:
+        x, y (int): Keypoint coordinates.
+        w, h (int): Image width and height.
+        binary_watermark (np.ndarray): Base 3x3 binary watermark.
+        angle (float): Keypoint angle.
+    
+    Returns:
+        np.ndarray: Adapted watermark pattern.
+    """
+    if x < w / 2 and y < h / 2:
+        # Top-left: rotate pattern
+        adapted_wm = rotate_watermark_pattern(binary_watermark, angle)
+    elif x >= w / 2 and y < h / 2:
+        # Top-right: flip vertically
+        adapted_wm = np.flipud(binary_watermark)
+    elif x < w / 2 and y >= h / 2:
+        # Bottom-left: flip horizontally
+        adapted_wm = np.fliplr(binary_watermark)
     else:
-        #Bottom-Right: \ pattern
-        return np.array([1, 0, 0], [0, 1, 0], [0, 0, 1])
+        # Bottom-right: rotate + flip horizontally
+        rotated = rotate_watermark_pattern(binary_watermark, angle)
+        adapted_wm = np.fliplr(rotated)
+
+    return adapted_wm
 
 # -----------------------------
 # LSB STEGANOGRAPHY
@@ -93,6 +117,35 @@ def apply_lsb_pattern(image, center, pattern):
                     bit = pattern[dy + half, dx + half]  # Get corresponding watermark bit
                     img[y, x, c] = set_lsb(original, bit) # Set new LSB
     return img
+
+def extract_lsb_pattern(image, center, size=3):
+    """
+    Extract the LSB pattern from a region centered at a keypoint.
+
+    Args:
+        image (np.ndarray): Input image.
+        center (tuple): (x, y) coordinates of the center.
+        size (int): Size of the square region (default 3x3).
+
+    Returns:
+        np.ndarray: Binary matrix of extracted LSBs.
+    """
+    cx, cy = center
+    h, w = image.shape[:2]
+    half = size // 2
+    pattern = np.zeros((size, size), dtype=np.uint8)
+
+    for dy in range(-half, half + 1):
+        for dx in range(-half, half + 1):
+            x, y = cx + dx, cy + dy
+            if 0 <= x < w and 0 <= y < h:
+                # Extract LSB from red channel (index 2)
+                pattern[dy + half, dx + half] = image[y, x, 2] & 1
+            else:
+                # If out of bounds, default to 0
+                pattern[dy + half, dx + half] = 0
+
+    return pattern
 
 
 
