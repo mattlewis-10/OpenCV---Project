@@ -6,7 +6,7 @@ import cv2
 #Functions from other classes
 from embed import embed_watermark
 from verify import verify_watermark
-# from detector.tamper_check import detect_tampering
+from tamper_check import detect_tampering
 
 class StegoApp:
     def __init__(self, root):
@@ -74,12 +74,17 @@ class StegoApp:
             messagebox.showwarning("Verification", f"Watermark NOT detected. Match: {match_pct:.2%}")
 
     def detect_tampering(self):
-        if self.cover_img is None:
-            messagebox.showerror("Error", "Load an image first.")
+        if self.cover_img is None or self.watermark_img is None:
+            messagebox.showerror("Error", "Load an image and watermark first")
             return
-        # result = detect_tampering(self.cover_img, self.watermark_img)
-        # messagebox.showinfo("Tampering Result", f"Tampering Detected: {result}")
-        messagebox.showinfo("Detect", "Tampering detection not yet implemented.")
+        
+        tampered, match_pct, cause = detect_tampering(self.cover_img, self.watermark_img)
+        
+        if tampered:
+            messagebox.showinfo("Tampering Detected", f"Watermark mismatch detected. \nMatch: {match_pct:.2%} \nCause: {cause}")
+        else:
+            messagebox.showinfo("No Tampering", f"Watermark consistent.\nMatch: {match_pct:.2%} \nStatus: {cause}")
+        
 
     def display_image(self, image):
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
