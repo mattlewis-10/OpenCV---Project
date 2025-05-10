@@ -147,6 +147,35 @@ def extract_lsb_pattern(image, center, size=3):
 
     return pattern
 
+# -----------------------------
+# EMBEDDED IMAGE TAMPERING
+# -----------------------------
+
+def crop_image(image, fraction=0.25):
+    
+    #Crop Top-Left Portion of Image
+    h, w = image.shape[:2]
+    x_start = int(w * fraction)
+    y_start = int(h * fraction)
+    
+    return image[y_start:, x_start:]
+
+def rotate_image(image, angle=30):
+    
+    #Rotate image around centre at certain angle
+    h, w = image.shape[:2]
+    center = (w // 2, h // 2)
+    matrix = cv2.getRotationMatrix2D(center, angle, scale=1.0)
+    
+    return cv2.warpAffine(image, matrix, (w, h))
+
+def resize_image(image, scale=0.5):
+    return cv2.resize(image, None, fx=scale, fy=scale, interpolation=cv2.INTER_AREA)
+
+def compress_image(image, output_path="temp_compressed.jpg", quality=30):
+    cv2.imwrite(output_path, image, [cv2.IMWRITE_JPEG_QUALITY, quality])
+    return cv2.imread(output_path)
+
 
 
 
