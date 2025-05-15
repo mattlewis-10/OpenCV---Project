@@ -62,18 +62,9 @@ def scale_watermark_pattern(pattern, target_size):
 
 
 def select_watermark_pattern(x, y, w, h, binary_watermark, angle):
-    """
-    Return an adapted watermark pattern based on keypoint position and angle.
     
-    Args:
-        x, y (int): Keypoint coordinates.
-        w, h (int): Image width and height.
-        binary_watermark (np.ndarray): Base 3x3 binary watermark.
-        angle (float): Keypoint angle.
+    #Return an adapted watermark pattern based on keypoint position and angle
     
-    Returns:
-        np.ndarray: Adapted watermark pattern.
-    """
     if x < w / 2 and y < h / 2:
         # Top-left: rotate pattern
         adapted_wm = rotate_watermark_pattern(binary_watermark, angle)
@@ -151,7 +142,7 @@ def extract_lsb_pattern(image, center, size=3):
 # EMBEDDED IMAGE TAMPERING
 # -----------------------------
 
-def crop_image(image, fraction=0.25):
+def crop_image(image, fraction=0.4):
     
     #Crop Top-Left Portion of Image
     h, w = image.shape[:2]

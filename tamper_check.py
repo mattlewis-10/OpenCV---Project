@@ -10,10 +10,10 @@ from verify import verify_watermark
 def get_tampering_cause(percentage, threshold):
     # (upper bound, cause description)
     rules = [
-        (0.0, "No watermark detected — severe tampering, possibly full crop or replacement"),
+        (0.0, "No watermark detected — severe tampering"),
         (0.2, "Very low match — likely heavy cropping or format conversion"),
         (0.5, "Partial match — possible resizing or partial crop"),
-        (threshold, "Minor mismatch — likely rotation or compression artifacts"),
+        (threshold, "Minor mismatch"),
         (1.0, "Watermark intact — no tampering detected")
     ]
 
