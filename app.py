@@ -148,7 +148,7 @@ class StegoApp:
         messagebox.showinfo("Tampering Applied", "Image Cropped")
         
     def rotate_current_image(self):
-        if not self.watermark_embedded:
+        if not (self.watermark_embedded or self.embedded_image_loaded):
             messagebox.showwarning("Tampering Not Allowed", "Please embed an image")
             return
         
@@ -157,7 +157,7 @@ class StegoApp:
         messagebox.showinfo("Tampering Applied", "Image Rotated")
         
     def resize_current_image(self):
-        if not self.watermark_embedded:
+        if not (self.watermark_embedded or self.embedded_image_loaded):
             messagebox.showwarning("Tampering Not Allowed", "Please embed an image")
             return
         
@@ -166,7 +166,7 @@ class StegoApp:
         messagebox.showinfo("Tampering Applied", "Image Resized")
         
     def compress_current_image(self):
-        if not self.watermark_embedded:
+        if not (self.watermark_embedded or self.embedded_image_loaded):
             messagebox.showwarning("Tampering Not Allowed", "Please embed an image")
             return
         
