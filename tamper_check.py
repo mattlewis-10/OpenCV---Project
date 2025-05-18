@@ -24,10 +24,10 @@ def get_tampering_cause(percentage, threshold):
 def detect_tampering(image, watermark, n_keypoints=100, threshold=0.7):
     
     #Watermark Verification
-    is_present, match_pct = verify_watermark(image, watermark, n_keypoints=n_keypoints, match_threshold=threshold)
+    is_present, match_pct, mismatched_kps = verify_watermark(image, watermark, n_keypoints=n_keypoints, match_threshold=threshold)
     
     tampered = not is_present
     
     cause = get_tampering_cause(match_pct, threshold)
     
-    return tampered, match_pct, cause
+    return tampered, match_pct, cause, mismatched_kps

@@ -98,7 +98,7 @@ class StegoApp:
             messagebox.showwarning("Missing Watermark", "Embed an image or load an embedded image")
             return
             
-        is_present, match_pct= verify_watermark(self.cover_img, self.watermark_img)
+        is_present, match_pct, _ = verify_watermark(self.cover_img, self.watermark_img)
         
         if is_present:
             messagebox.showinfo("Verification", f"Watermark detected! Match: {match_pct:.2%}")
@@ -114,10 +114,16 @@ class StegoApp:
             messagebox.showwarning("Missing Watermark", "Embed an image or load an embedded image")
             return
         
-        tampered, match_pct, cause = detect_tampering(self.cover_img, self.watermark_img)
+        tampered, match_pct, cause, mismatched_kps = detect_tampering(self.cover_img, self.watermark_img)
         
         if tampered:
+            #Mark mismatched keypoints on image
+            marked_img = self.cover_img.copy()
+            cv2.drawKeypoints(marked_img, mismatched_kps, marked_img, color=(0, 255, 0))
+            self.display_image(marked_img)
+            
             messagebox.showinfo("Tampering Detected", f"Watermark mismatch detected. \nMatch: {match_pct:.2%} \nCause: {cause}")
+            
         else:
             messagebox.showinfo("No Tampering", f"Watermark consistent.\nMatch: {match_pct:.2%} \nStatus: {cause}")
         
@@ -133,7 +139,7 @@ class StegoApp:
     #Tampering Functions
     
     def crop_current_image(self):
-        if not self.watermark_embedded:
+        if not (self.watermark_embedded or self.embedded_image_loaded):
             messagebox.showwarning("Tampering Not Allowed", "Please embed an image")
             return
         

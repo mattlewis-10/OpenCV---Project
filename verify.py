@@ -15,20 +15,6 @@ from image_utils import (
 )
 
 def verify_watermark(image, watermark, n_keypoints=100, match_threshold=0.7):
-    """
-    Verify if the watermark is present in the image.
-
-    Args:
-        image (np.ndarray): The image to check.
-        watermark_img (np.ndarray): The original watermark image.
-        n_keypoints (int): Number of keypoints to check.
-        match_threshold (float): Percentage of matches required to confirm presence.
-
-    Returns:
-        bool: True if watermark is detected, False otherwise.
-        float: Match percentage.
-    
-    """
     
     gray = preprocess_for_sift(image)
     
@@ -42,20 +28,27 @@ def verify_watermark(image, watermark, n_keypoints=100, match_threshold=0.7):
       binary_watermark = resize_watermark(binary_watermark, (3, 3))
       
     matches = 0
+    mismatched_kps = []
     
     for kp in keypoints:
         x, y = int(kp.pt[0]), int(kp.pt[1])
         extracted_pattern = extract_lsb_pattern(image, (x, y))
         
         #Compare patterns
-        if np.array_equal(extracted_pattern, binary_watermark):
-            matches += 1
+        if extracted_pattern is not None and extracted_pattern.shape == binary_watermark.shape:
+            if np.array_equal(extracted_pattern, binary_watermark):
+                matches += 1
+            else:
+                mismatched_kps.append(kp)
+                
+        else:
+            mismatched_kps.append(kp)
     
     match_percentage = matches / len(keypoints) if keypoints else 0
     
     is_present = match_percentage >= match_threshold
     
-    return is_present, match_percentage
+    return is_present, match_percentage, mismatched_kps
             
     
             

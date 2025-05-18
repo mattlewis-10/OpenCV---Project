@@ -113,13 +113,6 @@ def extract_lsb_pattern(image, center, size=3):
     """
     Extract the LSB pattern from a region centered at a keypoint.
 
-    Args:
-        image (np.ndarray): Input image.
-        center (tuple): (x, y) coordinates of the center.
-        size (int): Size of the square region (default 3x3).
-
-    Returns:
-        np.ndarray: Binary matrix of extracted LSBs.
     """
     cx, cy = center
     h, w = image.shape[:2]
