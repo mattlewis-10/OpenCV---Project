@@ -18,6 +18,7 @@ class StegoApp:
         self.cover_img = None
         self.watermark_img = None
         self.watermark_embedded = False
+        self.embedded_image_loaded = False
 
         # UI elements
         self.img_label = tk.Label(self.root)
@@ -30,11 +31,12 @@ class StegoApp:
         btn_frame.pack(pady=10)
         
         #Main Functionalities
-        tk.Button(btn_frame, text="Load Cover Image", command=self.load_cover_image).grid(row=0, column=0, padx=5)
-        tk.Button(btn_frame, text="Load Watermark", command=self.load_watermark).grid(row=0, column=1, padx=5)
-        tk.Button(btn_frame, text="Embed Watermark", command=self.embed_watermark).grid(row=0, column=2, padx=5)
-        tk.Button(btn_frame, text="Verify Watermark", command=self.verify_watermark).grid(row=0, column=3, padx=5)
-        tk.Button(btn_frame, text="Detect Tampering", command=self.detect_tampering).grid(row=0, column=4, padx=5)
+        tk.Button(btn_frame, text="Load Embedded Image", command=self.load_embedded_image).grid(row=0, column=0, padx=5)
+        tk.Button(btn_frame, text="Load Cover Image", command=self.load_cover_image).grid(row=0, column=1, padx=5)
+        tk.Button(btn_frame, text="Load Watermark", command=self.load_watermark).grid(row=0, column=2, padx=5)
+        tk.Button(btn_frame, text="Embed Watermark", command=self.embed_watermark).grid(row=0, column=3, padx=5)
+        tk.Button(btn_frame, text="Verify Watermark", command=self.verify_watermark).grid(row=0, column=4, padx=5)
+        tk.Button(btn_frame, text="Detect Tampering", command=self.detect_tampering).grid(row=0, column=5, padx=5)
         
         #Tampering Functionalities
         tk.Button(btn_frame, text="Crop Image", command=self.crop_current_image).grid(row=1, column=0, pady=(20, 0))
@@ -53,10 +55,22 @@ class StegoApp:
         if path:
             self.watermark_img = cv2.imread(path)
             messagebox.showinfo("Watermark", "Watermark image loaded successfully!")
+            
+    def load_embedded_image(self):
+        path = filedialog.askopenfilename(title="Select Embedded Image")
+        if path:
+            self.cover_img = cv2.imread(path)
+            self.display_image(self.cover_img)
+            self.watermark_embedded = True #Assume image is already embedded (tampered or not)
+            self.embedded_image_loaded = True
 
     def embed_watermark(self):
         if self.cover_img is None or self.watermark_img is None:
             messagebox.showerror("Error", "Load both cover and watermark images first.")
+            return
+        
+        if self.embedded_image_loaded == True:
+            messagebox.showwarning("Warning", "Image is already embedded")
             return
         
         try:
@@ -65,6 +79,10 @@ class StegoApp:
             self.cover_img = embedded
             self.display_image(embedded)
             self.watermark_embedded = True
+            self.embedded_image = False
+            
+            save_path = "assets/embedded_output.png"
+            cv2.imwrite(save_path, embedded)
             
             messagebox.showinfo("Success", "Watermark embedding successful!")
         
@@ -73,9 +91,13 @@ class StegoApp:
 
     def verify_watermark(self):
         if self.cover_img is None or self.watermark_img is None:
-            messagebox.showerror("Error", "Load an image and watermark first.")
+            messagebox.showerror("Error", "Load an image (embedded or cover) and watermark first.")
             return
         
+        if not self.watermark_embedded:
+            messagebox.showwarning("Missing Watermark", "Embed an image or load an embedded image")
+            return
+            
         is_present, match_pct= verify_watermark(self.cover_img, self.watermark_img)
         
         if is_present:
@@ -85,7 +107,11 @@ class StegoApp:
 
     def detect_tampering(self):
         if self.cover_img is None or self.watermark_img is None:
-            messagebox.showerror("Error", "Load an image and watermark first")
+            messagebox.showerror("Error", "Load an image (embedded or cover) and watermark first")
+            return
+        
+        if not self.watermark_embedded:
+            messagebox.showwarning("Missing Watermark", "Embed an image or load an embedded image")
             return
         
         tampered, match_pct, cause = detect_tampering(self.cover_img, self.watermark_img)
