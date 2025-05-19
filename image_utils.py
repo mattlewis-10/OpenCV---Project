@@ -62,7 +62,6 @@ def scale_watermark_pattern(pattern, target_size):
 
 
 def select_watermark_pattern(x, y, w, h, binary_watermark, angle):
-    
     #Return an adapted watermark pattern based on keypoint position and angle
     
     if x < w / 2 and y < h / 2:
@@ -85,15 +84,14 @@ def select_watermark_pattern(x, y, w, h, binary_watermark, angle):
 # LSB STEGANOGRAPHY
 # -----------------------------
 
+#Sets the LSB of a pixel value to the specified bit (0 or 1)
 def set_lsb(value, bit):
     return (value & ~1) | bit
 
 def apply_lsb_pattern(image, center, pattern):
-    """
-    Apply a binary 3x3 pattern to the LSBs of the pixel values
-    centered around the given (x, y) keypoint.
+    #Apply a binary 3x3 pattern to the LSBs of the pixel values
+    #centered around the given (x, y) keypoint.
     
-    """
     img = image.copy()  # Don't modify the original
     cx, cy = center     # Keypoint coordinates (x, y)
     h, w = img.shape[:2]
@@ -110,10 +108,8 @@ def apply_lsb_pattern(image, center, pattern):
     return img
 
 def extract_lsb_pattern(image, center, size=3):
-    """
-    Extract the LSB pattern from a region centered at a keypoint.
+    #Extract the LSB pattern from a region centered at a keypoint.
 
-    """
     cx, cy = center
     h, w = image.shape[:2]
     half = size // 2

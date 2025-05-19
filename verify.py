@@ -18,18 +18,20 @@ def verify_watermark(image, watermark, n_keypoints=100, match_threshold=0.7):
     
     gray = preprocess_for_sift(image)
     
+    #Detect Keypoints
     sift = cv2.SIFT_create()
     keypoints = sift.detect(gray, None)
     keypoints = sorted(keypoints, key=lambda x: -x.response)[:n_keypoints]
     
-    h, w = image.shape[:2]
+    #Prepare Watermark
     binary_watermark = convert_to_binary(watermark)
     if binary_watermark.shape != (3, 3):
       binary_watermark = resize_watermark(binary_watermark, (3, 3))
       
     matches = 0
-    mismatched_kps = []
+    mismatched_kps = [] #Array of mismatched keypoints
     
+    #Extract Watermark
     for kp in keypoints:
         x, y = int(kp.pt[0]), int(kp.pt[1])
         extracted_pattern = extract_lsb_pattern(image, (x, y))
