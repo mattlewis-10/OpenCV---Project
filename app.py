@@ -9,7 +9,11 @@ from verify import verify_watermark
 from tamper_check import detect_tampering
 from image_utils import crop_image, rotate_image, resize_image, compress_image
 
+
 class StegoApp:
+    
+    #User Interface Class
+    
     def __init__(self, root):
         self.root = root
         self.root.title("Image Steganography Tool")
