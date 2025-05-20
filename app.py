@@ -49,6 +49,10 @@ class StegoApp:
         if path:
             self.cover_img = cv2.imread(path)
             self.display_image(self.cover_img)
+            
+            #Reset embedding-flags
+            self.watermark_embedded = False
+            self.embedded_image_loaded = False
 
     def load_watermark(self):
         path = filedialog.askopenfilename(title="Select Watermark Image")
